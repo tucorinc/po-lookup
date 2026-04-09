@@ -5,406 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PO Lookup</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: white;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-        
-        img {
-            max-width: 100px;
-        }
-        
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
-            width: 100%;
+            max-width: 450px;
+            margin: auto;
+
         }
-        
+
         h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
+            text-align: center;
         }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        input {
-            flex: 1;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        button {
-            padding: 14px 30px;
-            background: #006351;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        button:hover {
-            background: #10241e;
-        }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .result.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-        
-        .result.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-        
-        .result.loading {
-            background: #649587;
-            border: 1px solid #bee5eb;
-            display: block;
-        }
-        
-        .po-info {
-            margin-top: 10px;
-        }
-        
-        .po-info-item {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-        
-        .po-info-item:last-child {
-            border-bottom: none;
-        }
-        
-        .po-info-label {
-            font-weight: 600;
-            color: #555;
-            font-size: 14px;
-        }
-        
-        .po-info-value {
-            color: #333;
-            font-size: 18px;
-            margin-top: 5px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .items-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid rgba(0,0,0,0.1);
-        }
-
-        .items-title {
-            font-weight: 600;
-            color: #333;
-            font-size: 16px;
+        .input-group {
             margin-bottom: 15px;
         }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #f9f9f9;
-            margin-bottom: 8px;
+        label {
+            display: block;
+            margin-bottom: 5px;
         }
-
-        .item-name {
-            font-size: 14px;
-            color: #333;
-            flex: 1;
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
         }
-
-        .item-quantity {
-            font-weight: 600;
-            color: #006351;
-            font-size: 16px;
-            margin-left: 10px;
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
-
-        .no-items {
-            color: #999;
-            font-style: italic;
-            font-size: 14px;
+        button:hover {
+            background-color: #0056b3;
         }
-    </style>
+</style>
 </head>
 <body>
-    <div class="container" align="center">
-        <h1><img src="https://tucor.com/wp-content/uploads/2022/04/logo-main-2x-logo.jpg"><br>PO Lookup</h1>
-        <p class="subtitle">Enter your purchase order number to check its status.</p>
-        
-        <div class="search-box">
-            <input 
-                type="text" 
-                id="poInput" 
-                placeholder="Enter PO Number"
-                onkeypress="if(event.key === 'Enter') searchPO()"
-            >
-            <button onclick="searchPO()" id="searchBtn">Search</button>
-        </div>
-        
-        <div id="result" class="result"></div>
+    <div class="container">
+      <h1>PO Lookup</h1>
+        <form id="poForm">
+          <div class="input-group">
+              <label for="poNumber">PO Number:</label>
+              <input type="text" id="poNumber" name="poNumber" required placeholder="Ex. 48184563">
+          </div>
+          <div align="right">
+            <button type="submit" onclick="sendData()">Search PO</button>
+          </div>  
+        </form>
     </div>
-
     <script>
-        const CONFIG = {
-            boardId: 8746648484,
-            poColumnId: 'text_mkp7bjvg',
-            statusColumnId: 'color_mkxvxhtd',
-            quantityColumnId: 'numeric_mks984py',
-            proxyUrl: 'https://monday-proxy.cwolinski.workers.dev'
-        };
-
-        const STATUS_COLORS = {
-            'Received': { bg: '#e67700', color: '#ffffff' },
-            'Processing': { bg: '#1976d2', color: '#ffffff' },
-            'Shipped': { bg: '#198450', color: '#ffffff' },
-            'Cancelled': { bg: '#7f7f7f', color: '#ffffff' }
-        };
-
-        async function searchPO() {
-            const poNumber = document.getElementById('poInput').value.trim();
-            const searchBtn = document.getElementById('searchBtn');
-            
-            if (!poNumber) {
-                showResult('error', 'Please enter a PO number');
-                return;
-            }
-            
-            searchBtn.disabled = true;
-            showResult('loading', 'Please wait...');
-            
-            try {
-                const allItems = await fetchAllItems();
-                console.log(`Total items fetched: ${allItems.length}`);
-                
-                const matchedItem = findPO(allItems, poNumber);
-                
-                if (matchedItem) {
-                    console.log('Match found!');
-                    console.log('Subitems:', matchedItem.subitems);
-                    displayPOInfo(matchedItem);
-                } else {
-                    showResult('error', `PO Number "${poNumber}" not found`);
-                }
-                
-            } catch (error) {
-                console.error('Search error:', error);
-                showResult('error', `Error: ${error.message}`);
-            } finally {
-                searchBtn.disabled = false;
-            }
-        }
-
-        async function fetchAllItems() {
-            let allItems = [];
-            let cursor = null;
-            let hasMore = true;
-            
-            while (hasMore) {
-                const query = `
-                    query {
-                        boards(ids: ${CONFIG.boardId}) {
-                            items_page(limit: 100 ${cursor ? `, cursor: "${cursor}"` : ''}) {
-                                cursor
-                                items {
-                                    id
-                                    name
-                                    column_values {
-                                        id
-                                        text
-                                        type
-                                    }
-                                    subitems {
-                                        id
-                                        name
-                                        column_values {
-                                            id
-                                            text
-                                            type
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                `;
-                
-                const response = await fetch(CONFIG.proxyUrl, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ query })
-                });
-
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.errors) {
-                    throw new Error(data.errors[0].message);
-                }
-                
-                const itemsPage = data.data.boards[0].items_page;
-                allItems = allItems.concat(itemsPage.items);
-                
-                cursor = itemsPage.cursor;
-                hasMore = itemsPage.items.length === 100;
-            }
-            
-            return allItems;
-        }
-
-        function findPO(items, poNumber) {
-            const searchTerm = poNumber.trim().toLowerCase();
-            
-            for (const item of items) {
-                const poColumn = item.column_values.find(col => col.id === CONFIG.poColumnId);
-                
-                if (poColumn && poColumn.text) {
-                    const columnValue = poColumn.text.trim().toLowerCase();
-                    
-                    if (columnValue === searchTerm) {
-                        return item;
-                    }
-                }
-            }
-            
-            return null;
-        }
-
-        function displayPOInfo(item) {
-            console.log('*** DISPLAYING PO INFO ***');
-            
-            const poColumn = item.column_values.find(col => col.id === CONFIG.poColumnId);
-            const statusColumn = item.column_values.find(col => col.id === CONFIG.statusColumnId);
-            
-            const poNumber = poColumn ? poColumn.text : 'N/A';
-            const status = statusColumn ? statusColumn.text : 'N/A';
-            const statusStyle = STATUS_COLORS[status] || { bg: '#f5f5f5', color: '#666' };
-            
-            let html = `
-                <h3 style="color: #2e7d32; margin-bottom: 15px;">✓ Order Found</h3>
-                <div class="po-info">
-                    <div class="po-info-item">
-                        <div class="po-info-label">PO Number</div>
-                        <div class="po-info-value">${poNumber}</div>
-                    </div>
-                    <div class="po-info-item">
-                        <div class="po-info-label">Status</div>
-                        <div class="po-info-value">
-                            <span class="status-badge" style="background: ${statusStyle.bg}; color: ${statusStyle.color};">
-                                ${status}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            if (item.subitems && item.subitems.length > 0) {
-                console.log(`Found ${item.subitems.length} subitems`);
-                
-                html += `
-                    <div class="items-section">
-                        <div class="items-title">Order Items (${item.subitems.length})</div>
-                `;
-
-                item.subitems.forEach((subitem, idx) => {
-                    const quantityColumn = subitem.column_values.find(col => col.id === CONFIG.quantityColumnId);
-                    const quantity = quantityColumn && quantityColumn.text ? quantityColumn.text : 'N/A';
-                    
-                    console.log(`${idx + 1}. ${subitem.name} - Qty: ${quantity}`);
-                    
-                    html += `
-                        <div class="item-row">
-                            <div class="item-name">${subitem.name}</div>
-                            <div class="item-quantity">Qty: ${quantity}</div>
-                        </div>
-                    `;
-                });
-
-                html += `</div>`;
-            } else {
-                console.log('No subitems found');
-            }
-            
-            showResult('success', html);
-        }
-
-        function showResult(type, message) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.className = `result ${type}`;
-            resultDiv.innerHTML = message;
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('poInput').focus();
+      function sendData() {
+        fetch("https://hooks.zapier.com/hooks/catch/10275282/u7s02ak/", {
+          onclick: event.preventDefault(),
+          method: "POST",
+          body: JSON.stringify({
+            poNumber: document.getElementById("poNumber").value
+          }),
         });
+      }
     </script>
 </body>
-
 </html>
-
-
-
